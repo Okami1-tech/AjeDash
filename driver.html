@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Driver - AjeDash</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 15px;
+    }
+    .container { max-width: 500px; margin: 0 auto; }
+    .header {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .logo { font-size: 24px; font-weight: 800; color: #2e7d32; }
+    .logout { background: #f5f5f5; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; color: #666; cursor: pointer; font-size: 13px; }
+    .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+    .card h2 { font-size: 18px; margin-bottom: 15px; }
+    .delivery-item {
+      padding: 16px;
+      border: 2px solid #e8e8e8;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .confirm-btn {
+      background: #2e7d32;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      width: 90%;
+      max-width: 350px;
+      text-align: center;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border: 2px solid #e8e8e8;
+      border-radius: 12px;
+      font-size: 16px;
+      text-align: center;
+    }
+    .modal-content button {
+      width: 100%;
+      padding: 14px;
+      background: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .empty { color: #999; font-size: 14px; text-align: center; padding: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">AjeDash</div>
+      <button class="logout" onclick="handleLogout()">Logout</button>
+    </div>
+    <div class="card">
+      <h2>📦 Your Deliveries</h2>
+      <div id="deliveryList"><p class="empty">No pending deliveries.</p></div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal" id="confirmModal">
+    <div class="modal-content">
+      <h3>Confirm Delivery</h3>
+      <input type="text" id="confirmPin" maxlength="4" placeholder="Enter 4-digit PIN">
+      <input type="file" id="photo" accept="image/*" capture="environment">
+      <button onclick="submitConfirm()">Submit Confirmation</button>
+      <button onclick="closeModal()" style="background:#ccc;color:#333;margin-top:5px;">Cancel</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const SUPABASE_URL = 'https://wxuqetrmynimxwixcydp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dXFldHJteW5pbXh3aXhjeWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTEzMDQsImV4cCI6MjEwMDY2NzMwNH0.4RzUsVNRwEZOhp0Rz1a7tMU0Wcv-HjOoelc1xLdaVbs';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) window.location.href = '/index.html';
+
+    const { data: profile } = await supabase.from('drivers').select('phone').eq('id', user.id).single();
+    const driverPhone = profile?.phone;
+
+    let currentDeliveryId = null;
+    let currentExpectedPin = null;
+
+    async function loadDeliveries() {
+      const { data } = await supabase.from('deliveries').select('*').eq('driver_phone', driverPhone).eq('status', 'pending');
+      const div = document.getElementById('deliveryList');
+      if (!data.length) { div.innerHTML = '<p class="empty">No pending deliveries.</p>'; return; }
+      div.innerHTML = data.map(d => `
+        <div class="delivery-item">
+          <div>
+            <strong>${d.receiver_name}</strong><br>
+            <small style="color:#888;">${d.items}</small><br>
+            <small style="color:#2e7d32;font-weight:600;">PIN: ${d.pin}</small>
+          </div>
+          <button class="confirm-btn" onclick="openConfirm('${d.id}','${d.pin}')">Confirm</button>
+        </div>
+      `).join('');
+    }
+
+    window.openConfirm = (id, pin) => {
+      currentDeliveryId = id;
+      currentExpectedPin = pin;
+      document.getElementById('confirmModal').style.display = 'flex';
+    };
+
+    window.closeModal = () => {
+      document.getElementById('confirmModal').style.display = 'none';
+      document.getElementById('confirmPin').value = '';
+      document.getElementById('photo').value = '';
+    };
+
+    window.submitConfirm = async () => {
+      const enteredPin = document.getElementById('confirmPin').value.trim();
+      if (enteredPin !== currentExpectedPin) {
+        alert('PIN does not match.');
+        return;
+      }
+      const payload = { status: 'confirmed', confirmed_at: new Date().toISOString() };
+      const { error } = await supabase.from('deliveries').update(payload).eq('id', currentDeliveryId);
+      if (error) {
+        // Offline queue
+        const queue = JSON.parse(localStorage.getItem('confirmQueue') || '[]');
+        queue.push({ id: currentDeliveryId, payload });
+        localStorage.setItem('confirmQueue', JSON.stringify(queue));
+        alert('Saved offline. Will sync when online.');
+      } else {
+        alert('Delivery confirmed!');
+      }
+      closeModal();
+      loadDeliveries();
+    };
+
+    window.addEventListener('online', async () => {
+      const queue = JSON.parse(localStorage.getItem('confirmQueue') || '[]');
+      for (const item of queue) {
+        await supabase.from('deliveries').update(item.payload).eq('id', item.id);
+      }
+      localStorage.removeItem('confirmQueue');
+      loadDeliveries();
+    });
+
+    window.handleLogout = async () => {
+      await supabase.auth.signOut();
+      window.location.href = '/index.html';
+    };
+
+    loadDeliveries();
+  </script>
+</body>
+</html>

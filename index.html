@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AjeDash</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #e8f5e9 0%, #f5f5f5 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 24px;
+      padding: 35px 25px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .logo {
+      font-size: 36px;
+      font-weight: 800;
+      color: #2e7d32;
+      letter-spacing: -1px;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 30px;
+      letter-spacing: 0.5px;
+    }
+    .tabs {
+      display: flex;
+      background: #f0f4f0;
+      border-radius: 14px;
+      padding: 5px;
+      margin-bottom: 25px;
+    }
+    .tab {
+      flex: 1;
+      padding: 14px;
+      border-radius: 11px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #999;
+      transition: all 0.25s;
+    }
+    .tab.active {
+      background: white;
+      color: #2e7d32;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    }
+    input {
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 12px;
+      border: 2px solid #e8e8e8;
+      border-radius: 14px;
+      font-size: 16px;
+      outline: none;
+      background: #fafafa;
+      transition: all 0.2s;
+    }
+    input:focus {
+      border-color: #2e7d32;
+      background: white;
+    }
+    .btn {
+      width: 100%;
+      padding: 16px;
+      background: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 5px;
+      transition: background 0.2s;
+    }
+    .btn:active {
+      background: #1b5e20;
+    }
+    .link {
+      color: #2e7d32;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .error {
+      color: #d32f2f;
+      font-size: 13px;
+      margin-top: 12px;
+      font-weight: 500;
+    }
+    .success {
+      color: #2e7d32;
+      font-size: 13px;
+      margin-top: 12px;
+      font-weight: 500;
+    }
+    .hidden {
+      display: none;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #f0f0f0;
+      margin: 25px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">AjeDash</div>
+    <div class="subtitle">DELIVER PROFIT, SECURED.</div>
+
+    <!-- Role Toggle -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchRole('seller')">Seller</button>
+      <button class="tab" onclick="switchRole('driver')">Driver</button>
+    </div>
+
+    <!-- Login / Signup Form -->
+    <input type="tel" id="phone" placeholder="Phone number" inputmode="tel">
+    <input type="password" id="pin" maxlength="4" placeholder="4-digit PIN" inputmode="numeric">
+    <button class="btn" id="loginBtn" onclick="handleLogin()">Login</button>
+    <p style="margin-top:18px;font-size:14px;color:#666;">
+      <span id="signupText">Don't have a seller account?</span>
+      <a class="link" href="#" onclick="handleSignup()">Sign up</a>
+    </p>
+    <p id="msg" class="error"></p>
+
+    <hr>
+
+    <!-- Forgot PIN -->
+    <a class="link" href="#" onclick="toggleReset()" style="font-size:13px;">Forgot PIN?</a>
+    <div id="resetBox" class="hidden" style="margin-top:15px;">
+      <input type="tel" id="resetPhone" placeholder="Your phone number">
+      <button class="btn" onclick="requestReset()">Request PIN Reset</button>
+      <p id="resetMsg" class="success"></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // ========== PUT YOUR SUPABASE CREDENTIALS HERE ==========
+    const SUPABASE_URL = 'https://wxuqetrmynimxwixcydp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dXFldHJteW5pbXh3aXhjeWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTEzMDQsImV4cCI6MjEwMDY2NzMwNH0.4RzUsVNRwEZOhp0Rz1a7tMU0Wcv-HjOoelc1xLdaVbs';
+    // =========================================================
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let currentRole = 'seller';
+
+    window.switchRole = (role) => {
+      currentRole = role;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`[onclick="switchRole('${role}')"]`).classList.add('active');
+      document.getElementById('signupText').textContent = 
+        role === 'seller' ? "Don't have a seller account?" : "Don't have a driver account?";
+    };
+
+    window.handleLogin = async () => {
+      const phone = document.getElementById('phone').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+      msg.style.color = '#d32f2f';
+      if (!phone || !pin) { msg.textContent = 'Enter phone and PIN.'; return; }
+      const fakeEmail = phone + '@ajedash.app';
+      const { data, error } = await supabase.auth.signInWithPassword({ email: fakeEmail, password: pin });
+      if (error) { msg.textContent = 'Login failed. Check phone and PIN.'; return; }
+      const { data: seller } = await supabase.from('sellers').select('id').eq('id', data.user.id).single();
+      window.location.href = seller ? '/dashboard.html' : '/driver.html';
+    };
+
+    window.handleSignup = async () => {
+      const phone = document.getElementById('phone').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+      msg.style.color = '#d32f2f';
+      if (!phone || !pin) { msg.textContent = 'Enter phone and PIN to sign up.'; return; }
+      if (pin.length !== 4) { msg.textContent = 'PIN must be exactly 4 digits.'; return; }
+      const fakeEmail = phone + '@ajedash.app';
+      const { data, error } = await supabase.auth.signUp({ email: fakeEmail, password: pin });
+      if (error) { msg.textContent = error.message; return; }
+      const table = currentRole === 'seller' ? 'sellers' : 'drivers';
+      const { error: insertErr } = await supabase.from(table).insert({ id: data.user.id, phone });
+      if (insertErr) { msg.textContent = insertErr.message; return; }
+      msg.style.color = '#2e7d32';
+      msg.textContent = 'Account created! You can now login.';
+    };
+
+    window.toggleReset = () => {
+      document.getElementById('resetBox').classList.toggle('hidden');
+    };
+
+    window.requestReset = async () => {
+      const phone = document.getElementById('resetPhone').value.trim();
+      const resetMsg = document.getElementById('resetMsg');
+      if (!phone) { resetMsg.textContent = 'Enter your phone number.'; return; }
+      const { error } = await supabase.from('pin_reset_requests').insert({ phone });
+      resetMsg.textContent = error ? 'Request failed. Try again.' : 'Request sent. We will call you within 24 hours.';
+    };
+  </script>
+</body>
+</html>
