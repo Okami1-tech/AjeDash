@@ -101,6 +101,7 @@
     const userData = JSON.parse(localStorage.getItem('ajedash_user'));
     if (!userData || userData.role !== 'seller') window.location.href = '/index.html';
     const sellerPhone = userData.phone;
+    const sellerBusinessName = userData.business_name || userData.name || 'AjeDash Seller';
     let currentTab = 'new';
     let foundDriver = null;
 
@@ -171,15 +172,32 @@
         return;
       }
       const pin = Math.floor(1000 + Math.random() * 9000).toString();
-      const delivery = { seller_phone: sellerPhone, receiver_name: receiverName, receiver_phone: receiverPhone, items, driver_phone: driverPhoneVal, payment_type: paymentType, due_date: dueDate, pin, status: 'pending' };
+      const delivery = {
+        seller_phone: sellerPhone,
+        receiver_name: receiverName,
+        receiver_phone: receiverPhone,
+        items,
+        driver_phone: driverPhoneVal,
+        payment_type: paymentType,
+        due_date: dueDate,
+        pin,
+        status: 'pending'
+      };
       const { error } = await supabase.from('deliveries').insert(delivery);
-      if (error) { msg.className = 'msg msg-error'; msg.textContent = 'Failed: ' + error.message; return; }
+      if (error) {
+        msg.className = 'msg msg-error';
+        msg.textContent = 'Failed: ' + error.message;
+        return;
+      }
       msg.className = 'msg msg-success';
       msg.textContent = `✅ Delivery created! PIN: ${pin}`;
+
+      // SMS with seller's business name
       const smsMsg = paymentType === 'credit'
-        ? `AjeDash: ${receiverName}, you received ${items} ON CREDIT. Pay by ${dueDate}. PIN: ${pin}.`
-        : `AjeDash: ${receiverName}, you will receive ${items}. Pay on delivery. PIN: ${pin}.`;
+        ? `AjeDash: ${sellerBusinessName} sent you ${items} ON CREDIT. Amount due by ${dueDate}. PIN: ${pin}. Give this PIN to the driver.`
+        : `AjeDash: ${sellerBusinessName} sent you ${items}. Pay on delivery. PIN: ${pin}. Give this PIN to the driver.`;
       window.open(`sms:${receiverPhone}?body=${encodeURIComponent(smsMsg)}`, '_blank');
+
       document.getElementById('receiverName').value = '';
       document.getElementById('receiverPhone').value = '';
       document.getElementById('items').value = '';
