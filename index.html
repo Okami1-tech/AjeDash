@@ -24,83 +24,26 @@
       box-shadow: 0 20px 60px rgba(0,0,0,0.08);
       text-align: center;
     }
-    .logo {
-      font-size: 36px;
-      font-weight: 800;
-      color: #2e7d32;
-      letter-spacing: -1px;
-      margin-bottom: 5px;
-    }
-    .subtitle {
-      color: #888;
-      font-size: 13px;
-      margin-bottom: 25px;
-      letter-spacing: 0.5px;
-    }
-    .tabs {
-      display: flex;
-      background: #f0f4f0;
-      border-radius: 14px;
-      padding: 5px;
-      margin-bottom: 25px;
-    }
+    .logo { font-size: 36px; font-weight: 800; color: #2e7d32; letter-spacing: -1px; margin-bottom: 5px; }
+    .subtitle { color: #888; font-size: 13px; margin-bottom: 25px; letter-spacing: 0.5px; }
+    .tabs { display: flex; background: #f0f4f0; border-radius: 14px; padding: 5px; margin-bottom: 25px; }
     .tab {
-      flex: 1;
-      padding: 14px;
-      border-radius: 11px;
-      font-weight: 700;
-      font-size: 14px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      color: #999;
-      transition: all 0.25s;
+      flex: 1; padding: 14px; border-radius: 11px; font-weight: 700; font-size: 14px;
+      cursor: pointer; border: none; background: transparent; color: #999; transition: all 0.25s;
     }
-    .tab.active {
-      background: white;
-      color: #2e7d32;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-    }
+    .tab.active { background: white; color: #2e7d32; box-shadow: 0 3px 12px rgba(0,0,0,0.06); }
     input {
-      width: 100%;
-      padding: 16px;
-      margin-bottom: 12px;
-      border: 2px solid #e8e8e8;
-      border-radius: 14px;
-      font-size: 16px;
-      outline: none;
-      background: #fafafa;
-      transition: all 0.2s;
+      width: 100%; padding: 16px; margin-bottom: 12px; border: 2px solid #e8e8e8;
+      border-radius: 14px; font-size: 16px; outline: none; background: #fafafa; transition: all 0.2s;
     }
-    input:focus {
-      border-color: #2e7d32;
-      background: white;
-    }
+    input:focus { border-color: #2e7d32; background: white; }
     .btn {
-      width: 100%;
-      padding: 16px;
-      background: #2e7d32;
-      color: white;
-      border: none;
-      border-radius: 14px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 5px;
-      transition: background 0.2s;
+      width: 100%; padding: 16px; background: #2e7d32; color: white; border: none;
+      border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 5px; transition: background 0.2s;
     }
     .btn:active { background: #1b5e20; }
-    .btn-outline {
-      background: transparent;
-      color: #2e7d32;
-      border: 2px solid #2e7d32;
-    }
-    .link {
-      color: #2e7d32;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 14px;
-    }
+    .btn-outline { background: transparent; color: #2e7d32; border: 2px solid #2e7d32; }
+    .link { color: #2e7d32; text-decoration: none; font-weight: 700; font-size: 14px; }
     .error { color: #d32f2f; font-size: 13px; margin-top: 12px; font-weight: 500; }
     .success { color: #2e7d32; font-size: 13px; margin-top: 12px; font-weight: 500; }
     .hidden { display: none; }
@@ -114,31 +57,25 @@
     <div class="logo">AjeDash</div>
     <div class="subtitle">DELIVER PROFIT, SECURED.</div>
 
-    <!-- Role Toggle -->
     <div class="tabs">
       <button id="sellerTab" class="tab active" onclick="switchRole('seller')">Seller</button>
       <button id="driverTab" class="tab" onclick="switchRole('driver')">Driver</button>
     </div>
 
-    <!-- Form Fields -->
     <input type="tel" id="phone" placeholder="Phone number (08012345678)" inputmode="tel" autocomplete="tel">
     <input type="password" id="pin" maxlength="4" placeholder="4-digit PIN" inputmode="numeric" autocomplete="off">
     
-    <!-- Signup confirm PIN -->
     <div id="signupFields" class="signup-fields">
       <input type="password" id="confirmPin" maxlength="4" placeholder="Confirm 4-digit PIN" inputmode="numeric" autocomplete="off">
+      <input type="text" id="driverName" placeholder="Your full name (Driver only)" style="display:none;">
     </div>
     
-    <!-- Buttons -->
     <button class="btn" id="loginBtn">Login</button>
     <p style="margin:15px 0;font-size:14px;color:#666;">or</p>
     <button class="btn btn-outline" id="signupBtn">Create Account</button>
     
     <p id="msg" class="error"></p>
-
     <hr>
-
-    <!-- Forgot PIN -->
     <a class="link" href="#" onclick="toggleReset(); return false;" style="font-size:13px;">Forgot PIN?</a>
     <div id="resetBox" class="hidden" style="margin-top:15px;">
       <input type="tel" id="resetPhone" placeholder="Your phone number">
@@ -149,12 +86,8 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    // ========== YOUR SUPABASE CREDENTIALS ==========
     const SUPABASE_URL = 'https://wxuqetrmynimxwixcydp.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dXFldHJteW5pbXh3aXhjeWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTEzMDQsImV4cCI6MjEwMDY2NzMwNH0.4RzUsVNRwEZOhp0Rz1a7tMU0Wcv-HjOoelc1xLdaVbs';
-    // ===============================================
-
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentRole = 'seller';
     let isSignupMode = false;
@@ -163,6 +96,7 @@
       currentRole = role;
       document.getElementById('sellerTab').classList.toggle('active', role === 'seller');
       document.getElementById('driverTab').classList.toggle('active', role === 'driver');
+      document.getElementById('driverName').style.display = role === 'driver' && isSignupMode ? 'block' : 'none';
     };
 
     document.getElementById('signupBtn').addEventListener('click', () => {
@@ -170,6 +104,7 @@
       document.getElementById('signupFields').classList.add('show');
       document.getElementById('loginBtn').textContent = 'Complete Sign Up';
       document.getElementById('signupBtn').style.display = 'none';
+      document.getElementById('driverName').style.display = currentRole === 'driver' ? 'block' : 'none';
       document.getElementById('msg').textContent = '';
     });
 
@@ -179,6 +114,8 @@
       document.getElementById('loginBtn').textContent = 'Login';
       document.getElementById('signupBtn').style.display = 'block';
       document.getElementById('confirmPin').value = '';
+      document.getElementById('driverName').value = '';
+      document.getElementById('driverName').style.display = 'none';
     }
 
     document.getElementById('loginBtn').addEventListener('click', async () => {
@@ -188,43 +125,26 @@
       msg.textContent = '';
       msg.style.color = '#d32f2f';
 
-      if (!phone || !pin) {
-        msg.textContent = 'Enter phone number and PIN.';
-        return;
-      }
-      if (pin.length !== 4 || isNaN(pin)) {
-        msg.textContent = 'PIN must be exactly 4 digits.';
-        return;
-      }
+      if (!phone || !pin) { msg.textContent = 'Enter phone number and PIN.'; return; }
+      if (pin.length !== 4 || isNaN(pin)) { msg.textContent = 'PIN must be exactly 4 digits.'; return; }
 
-      // ========== SIGNUP ==========
       if (isSignupMode) {
         const confirmPin = document.getElementById('confirmPin').value.trim();
         if (!confirmPin) { msg.textContent = 'Please confirm your PIN.'; return; }
         if (pin !== confirmPin) { msg.textContent = 'PINs do not match.'; return; }
 
         const table = currentRole === 'seller' ? 'sellers' : 'drivers';
-
-        // Check if user already exists
         const { data: existing } = await supabase.from(table).select('phone').eq('phone', phone).single();
-        if (existing) {
-          msg.textContent = 'This phone number is already registered. Try logging in.';
-          resetToLoginMode();
-          return;
+        if (existing) { msg.textContent = 'This phone number is already registered. Try logging in.'; resetToLoginMode(); return; }
+
+        const insertData = { phone, pin };
+        if (currentRole === 'driver') {
+          const driverName = document.getElementById('driverName').value.trim();
+          insertData.name = driverName || phone;
         }
 
-        // Insert new user with PIN stored in database
-        const { error } = await supabase.from(table).insert({
-          phone: phone,
-          pin: pin
-        });
-
-        if (error) {
-          console.error(error);
-          msg.textContent = 'Signup failed: ' + error.message;
-          resetToLoginMode();
-          return;
-        }
+        const { error } = await supabase.from(table).insert(insertData);
+        if (error) { msg.textContent = 'Signup failed: ' + error.message; resetToLoginMode(); return; }
 
         msg.style.color = '#2e7d32';
         msg.textContent = `Account created as ${currentRole}! You can now login.`;
@@ -234,34 +154,21 @@
         return;
       }
 
-      // ========== LOGIN ==========
       const table = currentRole === 'seller' ? 'sellers' : 'drivers';
-      const { data, error } = await supabase.from(table)
-        .select('*')
-        .eq('phone', phone)
-        .eq('pin', pin)
-        .single();
+      const { data, error } = await supabase.from(table).select('*').eq('phone', phone).eq('pin', pin).single();
+      if (error || !data) { msg.textContent = 'Wrong phone or PIN. Try again.'; return; }
 
-      if (error || !data) {
-        msg.textContent = 'Wrong phone or PIN. Try again.';
-        return;
-      }
-
-      // Store session in localStorage
       localStorage.setItem('ajedash_user', JSON.stringify({
         phone: data.phone,
+        name: data.name || '',
         role: currentRole,
         table: table
       }));
 
-      // Redirect
       window.location.href = currentRole === 'seller' ? '/dashboard.html' : '/driver.html';
     });
 
-    // ========== FORGOT PIN ==========
-    window.toggleReset = () => {
-      document.getElementById('resetBox').classList.toggle('hidden');
-    };
+    window.toggleReset = () => document.getElementById('resetBox').classList.toggle('hidden');
 
     document.getElementById('resetBtn').addEventListener('click', async () => {
       const phone = document.getElementById('resetPhone').value.trim();
