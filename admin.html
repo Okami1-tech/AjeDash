@@ -6,11 +6,7 @@
   <title>Admin - AjeDash</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
-      padding: 15px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 15px; }
     .container { max-width: 500px; margin: 0 auto; }
     .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
     .logo { font-size: 24px; font-weight: 800; color: #2e7d32; text-align: center; margin-bottom: 20px; }
@@ -34,56 +30,45 @@
       <button class="btn" onclick="logout()" style="background:#999;margin-top:15px;">Logout</button>
     </div>
   </div>
-
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
     const SUPABASE_URL = 'https://wxuqetrmynimxwixcydp.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dXFldHJteW5pbXh3aXhjeWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTEzMDQsImV4cCI6MjEwMDY2NzMwNH0.4RzUsVNRwEZOhp0Rz1a7tMU0Wcv-HjOoelc1xLdaVbs';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let adminKey = '';
 
-    window.login = async () => {
+    window.login = () => {
       adminKey = document.getElementById('adminKey').value.trim();
       document.getElementById('loginBox').classList.add('hidden');
       document.getElementById('adminPanel').classList.remove('hidden');
       loadRequests();
     };
-
     window.logout = () => {
       adminKey = '';
       document.getElementById('adminPanel').classList.add('hidden');
       document.getElementById('loginBox').classList.remove('hidden');
     };
-
     async function loadRequests() {
       const { data } = await supabase.from('pin_reset_requests').select('*').eq('status', 'pending');
       const div = document.getElementById('resetList');
-      if (!data.length) { div.innerHTML = '<p style="color:#999;">No pending requests.</p>'; return; }
+      if (!data || !data.length) { div.innerHTML = '<p style="color:#999;">No pending requests.</p>'; return; }
       div.innerHTML = data.map(r => `
         <div class="reset-item">
           <strong>${r.phone}</strong><br>
           <small style="color:#888;">${new Date(r.requested_at).toLocaleString()}</small>
           <input type="text" id="pin_${r.id}" maxlength="4" placeholder="New 4-digit PIN">
           <button class="btn" onclick="resetPin('${r.phone}','${r.id}')">Reset PIN</button>
-        </div>
-      `).join('');
+        </div>`).join('');
     }
-
     window.resetPin = async (phone, id) => {
       const newPin = document.getElementById(`pin_${id}`).value.trim();
-      if (!newPin || newPin.length !== 4) { alert('Enter a valid 4-digit PIN.'); return; }
+      if (!newPin || newPin.length !== 4) { alert('Enter valid 4-digit PIN.'); return; }
       const res = await fetch('https://YOUR_SUPABASE_URL.supabase.co/functions/v1/admin-reset-pin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminKey, phone, newPin })
       });
-      if (res.ok) {
-        alert('PIN reset successful!');
-        loadRequests();
-      } else {
-        alert('Reset failed. Check admin key or network.');
-      }
+      if (res.ok) { alert('PIN reset!'); loadRequests(); } else { alert('Failed.'); }
     };
   </script>
 </body>
