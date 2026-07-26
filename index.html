@@ -32,17 +32,18 @@
       cursor: pointer; border: none; background: transparent; color: #999; transition: all 0.25s;
     }
     .tab.active { background: white; color: #2e7d32; box-shadow: 0 3px 12px rgba(0,0,0,0.06); }
-    input {
+    input, select {
       width: 100%; padding: 16px; margin-bottom: 12px; border: 2px solid #e8e8e8;
-      border-radius: 14px; font-size: 16px; outline: none; background: #fafafa; transition: all 0.2s;
+      border-radius: 14px; font-size: 16px; outline: none; background: #fafafa; transition: all 0.2s; text-align: left;
     }
-    input:focus { border-color: #2e7d32; background: white; }
+    input:focus, select:focus { border-color: #2e7d32; background: white; }
     .btn {
       width: 100%; padding: 16px; background: #2e7d32; color: white; border: none;
       border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 5px; transition: background 0.2s;
     }
     .btn:active { background: #1b5e20; }
     .btn-outline { background: transparent; color: #2e7d32; border: 2px solid #2e7d32; }
+    .btn-back { background: #999; }
     .link { color: #2e7d32; text-decoration: none; font-weight: 700; font-size: 14px; }
     .error { color: #d32f2f; font-size: 13px; margin-top: 12px; font-weight: 500; }
     .success { color: #2e7d32; font-size: 13px; margin-top: 12px; font-weight: 500; }
@@ -51,50 +52,82 @@
     .signup-fields { display: none; }
     .signup-fields.show { display: block; }
     .switch-mode { margin-top: 18px; font-size: 14px; color: #666; }
+    .section-title { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">AjeDash</div>
-    <div class="subtitle">DELIVER PROFIT, SECURED.</div>
+    <!-- ========== MAIN LOGIN/SIGNUP SCREEN ========== -->
+    <div id="mainScreen">
+      <div class="logo">AjeDash</div>
+      <div class="subtitle">DELIVER PROFIT, SECURED.</div>
 
-    <!-- Role Tabs -->
-    <div class="tabs">
-      <button id="sellerTab" class="tab active" onclick="switchRole('seller')">Seller</button>
-      <button id="driverTab" class="tab" onclick="switchRole('driver')">Driver</button>
+      <div class="tabs">
+        <button id="sellerTab" class="tab active" onclick="switchRole('seller')">Seller</button>
+        <button id="driverTab" class="tab" onclick="switchRole('driver')">Driver</button>
+      </div>
+
+      <input type="tel" id="phone" placeholder="Phone number (08012345678)" inputmode="tel" autocomplete="tel">
+      <input type="password" id="pin" maxlength="4" placeholder="4-digit PIN" inputmode="numeric" autocomplete="off">
+      
+      <div id="signupFields" class="signup-fields">
+        <input type="password" id="confirmPin" maxlength="4" placeholder="Confirm 4-digit PIN" inputmode="numeric" autocomplete="off">
+        <input type="text" id="businessName" placeholder="Business name (Seller only)" style="display:none;">
+        <input type="text" id="driverName" placeholder="Your full name (Driver only)" style="display:none;">
+        <select id="securityQuestion" style="display:none;">
+          <option value="">Select a security question</option>
+          <option value="mother">What is your mother's maiden name?</option>
+          <option value="town">What town were you born in?</option>
+          <option value="pet">What is the name of your first pet?</option>
+          <option value="school">What was your primary school name?</option>
+          <option value="food">What is your favourite food?</option>
+        </select>
+        <input type="text" id="securityAnswer" placeholder="Your answer" style="display:none;">
+      </div>
+      
+      <button class="btn" id="loginBtn">Login</button>
+      <p id="loginModeText" style="margin:15px 0;font-size:14px;color:#666;">or</p>
+      <button class="btn btn-outline" id="signupBtn">Create Account</button>
+      <p id="switchToLoginText" class="switch-mode hidden">
+        Already have an account? <a class="link" href="#" id="switchToLoginLink">Login</a>
+      </p>
+      <p id="msg" class="error"></p>
+
+      <hr>
+      <a class="link" href="#" id="forgotPinLink" style="font-size:13px;">Forgot PIN?</a>
     </div>
 
-    <!-- Login Fields (always visible) -->
-    <input type="tel" id="phone" placeholder="Phone number (08012345678)" inputmode="tel" autocomplete="tel">
-    <input type="password" id="pin" maxlength="4" placeholder="4-digit PIN" inputmode="numeric" autocomplete="off">
-    
-    <!-- Signup Extra Fields (hidden by default) -->
-    <div id="signupFields" class="signup-fields">
-      <input type="password" id="confirmPin" maxlength="4" placeholder="Confirm 4-digit PIN" inputmode="numeric" autocomplete="off">
-      <input type="text" id="businessName" placeholder="Business name (Seller only)" style="display:none;">
-      <input type="text" id="driverName" placeholder="Your full name (Driver only)" style="display:none;">
-    </div>
-    
-    <!-- Buttons -->
-    <button class="btn" id="loginBtn">Login</button>
-    <p id="loginModeText" style="margin:15px 0;font-size:14px;color:#666;">or</p>
-    <button class="btn btn-outline" id="signupBtn">Create Account</button>
-    
-    <!-- Switch back to login (visible only in signup mode) -->
-    <p id="switchToLoginText" class="switch-mode hidden">
-      Already have an account? <a class="link" href="#" id="switchToLoginLink">Login</a>
-    </p>
-    
-    <p id="msg" class="error"></p>
+    <!-- ========== FORGOT PIN SCREEN ========== -->
+    <div id="forgotPinScreen" class="hidden">
+      <div class="section-title">Reset Your PIN</div>
+      
+      <!-- Step 1: Enter phone -->
+      <div id="forgotStep1">
+        <p style="font-size:14px;color:#666;margin-bottom:15px;">Enter your phone number to find your account.</p>
+        <input type="tel" id="forgotPhone" placeholder="Phone number" inputmode="tel">
+        <button class="btn" onclick="findAccount()">Find Account</button>
+        <p id="forgotMsg1" class="error"></p>
+        <button class="btn btn-back btn-outline" onclick="backToMain()" style="margin-top:5px;">Back to Login</button>
+      </div>
 
-    <hr>
+      <!-- Step 2: Answer security question -->
+      <div id="forgotStep2" class="hidden">
+        <p style="font-size:14px;color:#666;margin-bottom:5px;">Security Question:</p>
+        <p id="displayQuestion" style="font-weight:700;color:#333;margin-bottom:15px;"></p>
+        <input type="text" id="forgotAnswer" placeholder="Your answer">
+        <button class="btn" onclick="verifyAnswer()">Verify Answer</button>
+        <p id="forgotMsg2" class="error"></p>
+        <button class="btn btn-back btn-outline" onclick="backToStep1()" style="margin-top:5px;">Back</button>
+      </div>
 
-    <!-- Forgot PIN -->
-    <a class="link" href="#" onclick="toggleReset(); return false;" style="font-size:13px;">Forgot PIN?</a>
-    <div id="resetBox" class="hidden" style="margin-top:15px;">
-      <input type="tel" id="resetPhone" placeholder="Your phone number">
-      <button class="btn" id="resetBtn">Request PIN Reset</button>
-      <p id="resetMsg" class="success"></p>
+      <!-- Step 3: Set new PIN -->
+      <div id="forgotStep3" class="hidden">
+        <p style="font-size:14px;color:#2e7d32;font-weight:600;margin-bottom:15px;">✅ Answer correct!</p>
+        <input type="password" id="newPin" maxlength="4" placeholder="New 4-digit PIN" inputmode="numeric">
+        <input type="password" id="confirmNewPin" maxlength="4" placeholder="Confirm new PIN" inputmode="numeric">
+        <button class="btn" onclick="resetPin()">Reset PIN</button>
+        <p id="forgotMsg3" class="error"></p>
+      </div>
     </div>
   </div>
 
@@ -105,18 +138,24 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentRole = 'seller';
     let isSignupMode = false;
+    let forgotUserTable = null;
+    let forgotUserPhone = null;
 
     // ========== ROLE SWITCH ==========
     window.switchRole = (role) => {
       currentRole = role;
       document.getElementById('sellerTab').classList.toggle('active', role === 'seller');
       document.getElementById('driverTab').classList.toggle('active', role === 'driver');
-      // Update signup name field visibility
-      if (isSignupMode) {
-        document.getElementById('businessName').style.display = role === 'seller' ? 'block' : 'none';
-        document.getElementById('driverName').style.display = role === 'driver' ? 'block' : 'none';
-      }
+      if (isSignupMode) updateSignupFields();
     };
+
+    // ========== UPDATE SIGNUP FIELDS BASED ON ROLE ==========
+    function updateSignupFields() {
+      document.getElementById('businessName').style.display = currentRole === 'seller' ? 'block' : 'none';
+      document.getElementById('driverName').style.display = currentRole === 'driver' ? 'block' : 'none';
+      document.getElementById('securityQuestion').style.display = 'block';
+      document.getElementById('securityAnswer').style.display = 'block';
+    }
 
     // ========== ENTER SIGNUP MODE ==========
     document.getElementById('signupBtn').addEventListener('click', () => {
@@ -126,9 +165,8 @@
       document.getElementById('signupBtn').style.display = 'none';
       document.getElementById('loginModeText').style.display = 'none';
       document.getElementById('switchToLoginText').classList.remove('hidden');
-      document.getElementById('businessName').style.display = currentRole === 'seller' ? 'block' : 'none';
-      document.getElementById('driverName').style.display = currentRole === 'driver' ? 'block' : 'none';
       document.getElementById('msg').textContent = '';
+      updateSignupFields();
     });
 
     // ========== SWITCH BACK TO LOGIN MODE ==========
@@ -142,8 +180,12 @@
       document.getElementById('confirmPin').value = '';
       document.getElementById('businessName').value = '';
       document.getElementById('driverName').value = '';
+      document.getElementById('securityQuestion').value = '';
+      document.getElementById('securityAnswer').value = '';
       document.getElementById('businessName').style.display = 'none';
       document.getElementById('driverName').style.display = 'none';
+      document.getElementById('securityQuestion').style.display = 'none';
+      document.getElementById('securityAnswer').style.display = 'none';
     }
 
     document.getElementById('switchToLoginLink').addEventListener('click', (e) => {
@@ -162,17 +204,21 @@
       if (!phone || !pin) { msg.textContent = 'Enter phone number and PIN.'; return; }
       if (pin.length !== 4 || isNaN(pin)) { msg.textContent = 'PIN must be exactly 4 digits.'; return; }
 
-      // ========== SIGNUP ==========
       if (isSignupMode) {
         const confirmPin = document.getElementById('confirmPin').value.trim();
+        const secQuestion = document.getElementById('securityQuestion').value;
+        const secAnswer = document.getElementById('securityAnswer').value.trim();
+
         if (!confirmPin) { msg.textContent = 'Please confirm your PIN.'; return; }
         if (pin !== confirmPin) { msg.textContent = 'PINs do not match.'; return; }
+        if (!secQuestion) { msg.textContent = 'Select a security question.'; return; }
+        if (!secAnswer) { msg.textContent = 'Enter your security answer.'; return; }
 
         const table = currentRole === 'seller' ? 'sellers' : 'drivers';
         const { data: existing } = await supabase.from(table).select('phone').eq('phone', phone).single();
-        if (existing) { msg.textContent = 'This phone number is already registered. Try logging in.'; resetToLoginMode(); return; }
+        if (existing) { msg.textContent = 'This phone number is already registered.'; resetToLoginMode(); return; }
 
-        const insertData = { phone, pin };
+        const insertData = { phone, pin, security_question: secQuestion, security_answer: secAnswer.toLowerCase() };
         
         if (currentRole === 'seller') {
           const bizName = document.getElementById('businessName').value.trim();
@@ -187,17 +233,17 @@
         if (error) { msg.textContent = 'Signup failed: ' + error.message; resetToLoginMode(); return; }
 
         msg.style.color = '#2e7d32';
-        msg.textContent = `Account created as ${currentRole}! You can now login.`;
+        msg.textContent = 'Account created! You can now login.';
         resetToLoginMode();
         document.getElementById('phone').value = '';
         document.getElementById('pin').value = '';
         return;
       }
 
-      // ========== LOGIN ==========
+      // Login
       const table = currentRole === 'seller' ? 'sellers' : 'drivers';
       const { data, error } = await supabase.from(table).select('*').eq('phone', phone).eq('pin', pin).single();
-      if (error || !data) { msg.textContent = 'Wrong phone or PIN. Try again.'; return; }
+      if (error || !data) { msg.textContent = 'Wrong phone or PIN.'; return; }
 
       localStorage.setItem('ajedash_user', JSON.stringify({
         phone: data.phone,
@@ -210,18 +256,112 @@
       window.location.href = currentRole === 'seller' ? '/dashboard.html' : '/driver.html';
     });
 
-    // ========== FORGOT PIN ==========
-    window.toggleReset = () => document.getElementById('resetBox').classList.toggle('hidden');
-
-    document.getElementById('resetBtn').addEventListener('click', async () => {
-      const phone = document.getElementById('resetPhone').value.trim();
-      const resetMsg = document.getElementById('resetMsg');
-      resetMsg.textContent = '';
-      if (!phone) { resetMsg.textContent = 'Enter your phone number.'; resetMsg.style.color = '#d32f2f'; return; }
-      const { error } = await supabase.from('pin_reset_requests').insert({ phone });
-      resetMsg.textContent = error ? 'Request failed.' : 'Request sent. We will call you within 24 hours.';
-      resetMsg.style.color = error ? '#d32f2f' : '#2e7d32';
+    // ========== FORGOT PIN FLOW ==========
+    document.getElementById('forgotPinLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('mainScreen').classList.add('hidden');
+      document.getElementById('forgotPinScreen').classList.remove('hidden');
+      document.getElementById('forgotStep1').classList.remove('hidden');
+      document.getElementById('forgotStep2').classList.add('hidden');
+      document.getElementById('forgotStep3').classList.add('hidden');
+      document.getElementById('forgotPhone').value = '';
+      document.getElementById('forgotAnswer').value = '';
+      document.getElementById('newPin').value = '';
+      document.getElementById('confirmNewPin').value = '';
+      document.getElementById('forgotMsg1').textContent = '';
+      document.getElementById('forgotMsg2').textContent = '';
+      document.getElementById('forgotMsg3').textContent = '';
     });
+
+    window.backToMain = () => {
+      document.getElementById('forgotPinScreen').classList.add('hidden');
+      document.getElementById('mainScreen').classList.remove('hidden');
+    };
+
+    window.backToStep1 = () => {
+      document.getElementById('forgotStep2').classList.add('hidden');
+      document.getElementById('forgotStep1').classList.remove('hidden');
+      document.getElementById('forgotMsg2').textContent = '';
+    };
+
+    // Step 1: Find account
+    window.findAccount = async () => {
+      const phone = document.getElementById('forgotPhone').value.trim();
+      const msg = document.getElementById('forgotMsg1');
+      msg.textContent = '';
+      if (!phone) { msg.textContent = 'Enter your phone number.'; return; }
+
+      // Check both tables
+      const { data: seller } = await supabase.from('sellers').select('*').eq('phone', phone).single();
+      const { data: driver } = await supabase.from('drivers').select('*').eq('phone', phone).single();
+      const user = seller || driver;
+      
+      if (!user) { msg.textContent = 'No account found with this number.'; return; }
+
+      forgotUserTable = seller ? 'sellers' : 'drivers';
+      forgotUserPhone = phone;
+
+      // Show security question
+      const questionMap = {
+        mother: "What is your mother's maiden name?",
+        town: "What town were you born in?",
+        pet: "What is the name of your first pet?",
+        school: "What was your primary school name?",
+        food: "What is your favourite food?"
+      };
+      document.getElementById('displayQuestion').textContent = questionMap[user.security_question] || user.security_question;
+      
+      document.getElementById('forgotStep1').classList.add('hidden');
+      document.getElementById('forgotStep2').classList.remove('hidden');
+    };
+
+    // Step 2: Verify answer
+    window.verifyAnswer = async () => {
+      const answer = document.getElementById('forgotAnswer').value.trim().toLowerCase();
+      const msg = document.getElementById('forgotMsg2');
+      msg.textContent = '';
+      if (!answer) { msg.textContent = 'Enter your answer.'; return; }
+
+      const { data } = await supabase.from(forgotUserTable).select('security_answer').eq('phone', forgotUserPhone).single();
+      
+      if (!data || data.security_answer !== answer) {
+        msg.textContent = 'Wrong answer. Try again.';
+        return;
+      }
+
+      document.getElementById('forgotStep2').classList.add('hidden');
+      document.getElementById('forgotStep3').classList.remove('hidden');
+    };
+
+    // Step 3: Set new PIN
+    window.resetPin = async () => {
+      const newPin = document.getElementById('newPin').value.trim();
+      const confirmPin = document.getElementById('confirmNewPin').value.trim();
+      const msg = document.getElementById('forgotMsg3');
+      msg.textContent = '';
+      msg.style.color = '#d32f2f';
+
+      if (!newPin || !confirmPin) { msg.textContent = 'Fill both PIN fields.'; return; }
+      if (newPin.length !== 4 || isNaN(newPin)) { msg.textContent = 'PIN must be 4 digits.'; return; }
+      if (newPin !== confirmPin) { msg.textContent = 'PINs do not match.'; return; }
+
+      const { error } = await supabase.from(forgotUserTable).update({ pin: newPin }).eq('phone', forgotUserPhone);
+      
+      if (error) { msg.textContent = 'Reset failed. Try again.'; return; }
+
+      msg.style.color = '#2e7d32';
+      msg.textContent = 'PIN reset successful! Redirecting to login...';
+      
+      setTimeout(() => {
+        document.getElementById('forgotPinScreen').classList.add('hidden');
+        document.getElementById('mainScreen').classList.remove('hidden');
+        document.getElementById('phone').value = forgotUserPhone;
+        document.getElementById('pin').value = '';
+        document.getElementById('msg').textContent = '';
+        forgotUserTable = null;
+        forgotUserPhone = null;
+      }, 2000);
+    };
   </script>
 </body>
 </html>
