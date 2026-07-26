@@ -8,22 +8,17 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f4f0; padding: 15px; padding-bottom: 80px; }
     .container { max-width: 500px; margin: 0 auto; }
-
     .header { background: white; border-radius: 20px; padding: 18px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
     .logo { font-size: 24px; font-weight: 800; color: #2e7d32; }
     .logout { background: #f5f5f5; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; color: #666; cursor: pointer; font-size: 13px; }
-
     .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
     .card h2 { font-size: 17px; margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 8px; }
-
     input, select, textarea { width: 100%; padding: 14px; margin-bottom: 10px; border: 2px solid #e8e8e8; border-radius: 12px; font-size: 15px; outline: none; background: #fafafa; font-family: inherit; }
     input:focus, select:focus { border-color: #2e7d32; background: white; }
-
     .btn { width: 100%; padding: 15px; background: #2e7d32; color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 5px; }
     .btn:active { background: #1b5e20; }
     .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; width: auto; margin: 0; }
     .btn-outline { background: white; color: #2e7d32; border: 2px solid #2e7d32; }
-
     .driver-search-box { position: relative; margin-bottom: 10px; }
     .driver-result { padding: 12px; border: 2px solid #c8e6c9; border-radius: 10px; background: #f9fdf9; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
     .driver-result strong { color: #2e7d32; }
@@ -31,7 +26,6 @@
     .driver-not-found { padding: 12px; border: 2px solid #ffcdd2; border-radius: 10px; background: #fffafa; color: #c62828; font-size: 13px; margin-top: 8px; }
     .selected-driver { background: #e8f5e9; border: 2px solid #2e7d32; border-radius: 10px; padding: 10px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     .selected-driver .remove-driver { color: #d32f2f; font-weight: bold; cursor: pointer; font-size: 18px; }
-
     .delivery-card { border: 2px solid #e8e8e8; border-radius: 14px; padding: 14px; margin-bottom: 10px; background: #fafafa; }
     .delivery-card.confirmed { border-color: #c8e6c9; background: #f9fdf9; }
     .delivery-card.overdue { border-color: #ffcdd2; background: #fffafa; }
@@ -46,15 +40,12 @@
     .delivery-pin { display: inline-block; background: #2e7d32; color: white; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 13px; margin-top: 5px; letter-spacing: 1px; }
     .delivery-photo { width: 100%; max-width: 200px; border-radius: 10px; margin-top: 8px; border: 2px solid #e0e0e0; cursor: pointer; }
     .delivery-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-
     .tabs { display: flex; background: #e8f0e8; border-radius: 12px; padding: 4px; margin-bottom: 15px; }
     .tab { flex: 1; padding: 10px; border-radius: 10px; font-weight: 600; font-size: 13px; cursor: pointer; border: none; background: transparent; color: #666; text-align: center; }
     .tab.active { background: white; color: #2e7d32; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 200; }
     .modal img { max-width: 90%; max-height: 80%; border-radius: 12px; }
     .modal .close-modal { position: absolute; top: 20px; right: 20px; color: white; font-size: 28px; cursor: pointer; font-weight: bold; }
-
     .empty { color: #999; font-size: 14px; text-align: center; padding: 20px; }
     .msg { font-size: 13px; margin-top: 10px; font-weight: 500; }
     .msg-success { color: #2e7d32; }
@@ -67,22 +58,17 @@
       <div class="logo">AjeDash</div>
       <button class="logout" onclick="handleLogout()">Logout</button>
     </div>
-
     <div class="tabs">
       <button class="tab active" onclick="switchTab('new')">➕ New</button>
       <button class="tab" onclick="switchTab('pending')">⏳ Pending</button>
       <button class="tab" onclick="switchTab('confirmed')">✅ Confirmed</button>
       <button class="tab" onclick="switchTab('credit')">💰 Credit</button>
     </div>
-
-    <!-- New Delivery Form -->
     <div class="card" id="tab-new">
       <h2>📦 New Delivery</h2>
       <input type="text" id="receiverName" placeholder="Receiver name">
       <input type="tel" id="receiverPhone" placeholder="Receiver phone">
       <input type="text" id="items" placeholder="Items (e.g., 30 baskets tomatoes)">
-      
-      <!-- Driver Search -->
       <label style="font-size:13px;font-weight:600;color:#555;display:block;margin-bottom:4px;">🚚 Search Driver by Phone Number</label>
       <div class="driver-search-box">
         <input type="tel" id="driverSearch" placeholder="Enter driver phone number (080...)" oninput="searchDriver()">
@@ -90,7 +76,6 @@
       </div>
       <input type="hidden" id="selectedDriverPhone">
       <div id="selectedDriverDisplay"></div>
-
       <select id="paymentType" onchange="toggleDueDate()">
         <option value="cash">Cash on delivery</option>
         <option value="credit">Credit</option>
@@ -99,14 +84,10 @@
       <button class="btn" onclick="createDelivery()">Create Delivery & Send SMS</button>
       <p id="deliveryMsg" class="msg"></p>
     </div>
-
-    <!-- Other Tabs -->
     <div class="card" id="tab-pending" style="display:none;"><h2>⏳ Pending Deliveries</h2><div id="pendingList"><p class="empty">No pending deliveries.</p></div></div>
     <div class="card" id="tab-confirmed" style="display:none;"><h2>✅ Confirmed Deliveries</h2><div id="confirmedList"><p class="empty">No confirmed deliveries.</p></div></div>
     <div class="card" id="tab-credit" style="display:none;"><h2>💰 Outstanding Credit</h2><div id="creditList"><p class="empty">No outstanding credit.</p></div></div>
   </div>
-
-  <!-- Photo Modal -->
   <div class="modal" id="photoModal" onclick="closePhotoModal()">
     <span class="close-modal">&times;</span>
     <img id="photoModalImg" src="" alt="Delivery Photo">
@@ -114,19 +95,15 @@
 
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
     const SUPABASE_URL = 'https://wxuqetrmynimxwixcydp.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dXFldHJteW5pbXh3aXhjeWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTEzMDQsImV4cCI6MjEwMDY2NzMwNH0.4RzUsVNRwEZOhp0Rz1a7tMU0Wcv-HjOoelc1xLdaVbs';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const userData = JSON.parse(localStorage.getItem('ajedash_user'));
     if (!userData || userData.role !== 'seller') window.location.href = '/index.html';
     const sellerPhone = userData.phone;
-
     let currentTab = 'new';
     let foundDriver = null;
 
-    // ========== TAB SWITCHING ==========
     window.switchTab = (tab) => {
       currentTab = tab;
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -144,11 +121,9 @@
         document.getElementById('paymentType').value === 'credit' ? 'block' : 'none';
     };
 
-    // ========== DRIVER SEARCH ==========
     window.searchDriver = async () => {
       const searchPhone = document.getElementById('driverSearch').value.trim();
       const resultDiv = document.getElementById('driverSearchResult');
-      
       if (searchPhone.length < 10) {
         resultDiv.innerHTML = '';
         foundDriver = null;
@@ -156,27 +131,21 @@
         document.getElementById('selectedDriverDisplay').innerHTML = '';
         return;
       }
-
-      const { data, error } = await supabase.from('drivers').select('*').eq('phone', searchPhone).single();
-
+      const { data } = await supabase.from('drivers').select('*').eq('phone', searchPhone).single();
       if (data) {
         foundDriver = data;
         document.getElementById('selectedDriverPhone').value = data.phone;
         document.getElementById('selectedDriverDisplay').innerHTML = `
           <div class="selected-driver">
-            <div>
-              <strong>✅ ${data.name || 'Driver'}</strong><br>
-              <small>${data.phone}</small>
-            </div>
+            <div><strong>✅ ${data.name || 'Driver'}</strong><br><small>${data.phone}</small></div>
             <span class="remove-driver" onclick="clearDriver()">&times;</span>
-          </div>
-        `;
+          </div>`;
         resultDiv.innerHTML = '';
       } else {
         foundDriver = null;
         document.getElementById('selectedDriverPhone').value = '';
         document.getElementById('selectedDriverDisplay').innerHTML = '';
-        resultDiv.innerHTML = '<div class="driver-not-found">⚠️ No driver found with this number. Ask them to sign up on AjeDash as a Driver first.</div>';
+        resultDiv.innerHTML = '<div class="driver-not-found">⚠️ No driver found. Ask them to sign up on AjeDash as a Driver first.</div>';
       }
     };
 
@@ -188,7 +157,6 @@
       document.getElementById('driverSearchResult').innerHTML = '';
     };
 
-    // ========== CREATE DELIVERY ==========
     window.createDelivery = async () => {
       const receiverName = document.getElementById('receiverName').value.trim();
       const receiverPhone = document.getElementById('receiverPhone').value.trim();
@@ -197,41 +165,21 @@
       const paymentType = document.getElementById('paymentType').value;
       const dueDate = paymentType === 'credit' ? document.getElementById('dueDate').value : null;
       const msg = document.getElementById('deliveryMsg');
-
       if (!receiverName || !receiverPhone || !items || !driverPhoneVal) {
         msg.className = 'msg msg-error';
         msg.textContent = 'Fill all fields and select a valid driver.';
         return;
       }
-
       const pin = Math.floor(1000 + Math.random() * 9000).toString();
-      const delivery = {
-        seller_phone: sellerPhone,
-        receiver_name: receiverName,
-        receiver_phone: receiverPhone,
-        items,
-        driver_phone: driverPhoneVal,
-        payment_type: paymentType,
-        due_date: dueDate,
-        pin,
-        status: 'pending'
-      };
-
+      const delivery = { seller_phone: sellerPhone, receiver_name: receiverName, receiver_phone: receiverPhone, items, driver_phone: driverPhoneVal, payment_type: paymentType, due_date: dueDate, pin, status: 'pending' };
       const { error } = await supabase.from('deliveries').insert(delivery);
-      if (error) {
-        msg.className = 'msg msg-error';
-        msg.textContent = 'Failed: ' + error.message;
-        return;
-      }
-
+      if (error) { msg.className = 'msg msg-error'; msg.textContent = 'Failed: ' + error.message; return; }
       msg.className = 'msg msg-success';
       msg.textContent = `✅ Delivery created! PIN: ${pin}`;
-
       const smsMsg = paymentType === 'credit'
         ? `AjeDash: ${receiverName}, you received ${items} ON CREDIT. Pay by ${dueDate}. PIN: ${pin}.`
         : `AjeDash: ${receiverName}, you will receive ${items}. Pay on delivery. PIN: ${pin}.`;
       window.open(`sms:${receiverPhone}?body=${encodeURIComponent(smsMsg)}`, '_blank');
-
       document.getElementById('receiverName').value = '';
       document.getElementById('receiverPhone').value = '';
       document.getElementById('items').value = '';
@@ -241,49 +189,35 @@
       clearDriver();
     };
 
-    // ========== LOAD FUNCTIONS ==========
     async function loadPending() {
       const { data } = await supabase.from('deliveries').select('*').eq('seller_phone', sellerPhone).eq('status', 'pending').order('created_at', { ascending: false });
-      const div = document.getElementById('pendingList');
-      if (!data || !data.length) { div.innerHTML = '<p class="empty">No pending deliveries.</p>'; return; }
-      div.innerHTML = data.map(d => renderDeliveryCard(d, 'pending')).join('');
+      document.getElementById('pendingList').innerHTML = data && data.length ? data.map(d => renderCard(d, 'pending')).join('') : '<p class="empty">No pending deliveries.</p>';
     }
-
     async function loadConfirmed() {
       const { data } = await supabase.from('deliveries').select('*').eq('seller_phone', sellerPhone).eq('status', 'confirmed').order('confirmed_at', { ascending: false });
-      const div = document.getElementById('confirmedList');
-      if (!data || !data.length) { div.innerHTML = '<p class="empty">No confirmed deliveries.</p>'; return; }
-      div.innerHTML = data.map(d => renderDeliveryCard(d, 'confirmed')).join('');
+      document.getElementById('confirmedList').innerHTML = data && data.length ? data.map(d => renderCard(d, 'confirmed')).join('') : '<p class="empty">No confirmed deliveries.</p>';
     }
-
     async function loadCredits() {
       const { data } = await supabase.from('deliveries').select('*').eq('seller_phone', sellerPhone).eq('payment_type', 'credit').neq('status', 'settled').order('created_at', { ascending: false });
-      const div = document.getElementById('creditList');
-      if (!data || !data.length) { div.innerHTML = '<p class="empty">No outstanding credit.</p>'; return; }
-      div.innerHTML = data.map(d => {
-        const overdue = d.due_date && new Date(d.due_date) < new Date() && d.status !== 'settled';
-        return renderDeliveryCard(d, overdue ? 'overdue' : 'credit');
-      }).join('');
+      document.getElementById('creditList').innerHTML = data && data.length ? data.map(d => {
+        const overdue = d.due_date && new Date(d.due_date) < new Date();
+        return renderCard(d, overdue ? 'overdue' : 'credit');
+      }).join('') : '<p class="empty">No outstanding credit.</p>';
     }
 
-    function renderDeliveryCard(d, type) {
+    function renderCard(d, type) {
       const isCredit = d.payment_type === 'credit';
       const badgeClass = type === 'overdue' ? 'badge-overdue' : `badge-${d.status}`;
       const badgeText = type === 'overdue' ? 'OVERDUE' : d.status.toUpperCase();
       const cardClass = type === 'overdue' ? 'delivery-card overdue' : `delivery-card ${d.status}`;
-
       return `
         <div class="${cardClass}">
           <div class="delivery-header">
-            <div>
-              <strong>${d.receiver_name}</strong>
-              <div class="delivery-details">${d.receiver_phone}</div>
-            </div>
+            <div><strong>${d.receiver_name}</strong><div class="delivery-details">${d.receiver_phone}</div></div>
             <span class="badge ${badgeClass}">${badgeText}</span>
           </div>
           <div class="delivery-details">
-            📦 ${d.items}<br>
-            🚚 Driver: ${d.driver_phone}<br>
+            📦 ${d.items}<br>🚚 Driver: ${d.driver_phone}<br>
             ${isCredit ? `💳 Credit · Due: ${d.due_date || 'N/A'}<br>` : '💵 Cash on delivery<br>'}
             📅 ${new Date(d.created_at).toLocaleDateString()}
           </div>
@@ -293,34 +227,14 @@
             ${d.status === 'confirmed' && isCredit ? `<button class="btn btn-sm" onclick="markPaid('${d.id}')">Mark Paid</button>` : ''}
             ${d.status === 'pending' ? `<button class="btn btn-sm btn-outline" onclick="cancelDelivery('${d.id}')">Cancel</button>` : ''}
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    window.markPaid = async (id) => {
-      await supabase.from('deliveries').update({ status: 'settled' }).eq('id', id);
-      loadCredits();
-      loadConfirmed();
-    };
-
-    window.cancelDelivery = async (id) => {
-      if (!confirm('Cancel this delivery?')) return;
-      await supabase.from('deliveries').update({ status: 'cancelled' }).eq('id', id);
-      loadPending();
-    };
-
-    window.viewPhoto = (url) => {
-      document.getElementById('photoModalImg').src = url;
-      document.getElementById('photoModal').style.display = 'flex';
-    };
-    window.closePhotoModal = () => {
-      document.getElementById('photoModal').style.display = 'none';
-    };
-
-    window.handleLogout = () => {
-      localStorage.removeItem('ajedash_user');
-      window.location.href = '/index.html';
-    };
+    window.markPaid = async (id) => { await supabase.from('deliveries').update({ status: 'settled' }).eq('id', id); loadCredits(); loadConfirmed(); };
+    window.cancelDelivery = async (id) => { if (confirm('Cancel?')) { await supabase.from('deliveries').update({ status: 'cancelled' }).eq('id', id); loadPending(); } };
+    window.viewPhoto = (url) => { document.getElementById('photoModalImg').src = url; document.getElementById('photoModal').style.display = 'flex'; };
+    window.closePhotoModal = () => { document.getElementById('photoModal').style.display = 'none'; };
+    window.handleLogout = () => { localStorage.removeItem('ajedash_user'); window.location.href = '/index.html'; };
   </script>
 </body>
 </html>
