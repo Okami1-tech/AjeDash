@@ -11,10 +11,7 @@
       background: #f5f5f5;
       padding: 15px;
     }
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-    }
+    .container { max-width: 500px; margin: 0 auto; }
     .header {
       background: white;
       border-radius: 20px;
@@ -25,11 +22,7 @@
       align-items: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
-    .logo {
-      font-size: 24px;
-      font-weight: 800;
-      color: #2e7d32;
-    }
+    .logo { font-size: 24px; font-weight: 800; color: #2e7d32; }
     .logout {
       background: #f5f5f5;
       border: none;
@@ -47,11 +40,7 @@
       margin-bottom: 15px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
-    .card h2 {
-      font-size: 18px;
-      margin-bottom: 15px;
-      color: #333;
-    }
+    .card h2 { font-size: 18px; margin-bottom: 15px; color: #333; }
     input, select, textarea {
       width: 100%;
       padding: 14px;
@@ -63,10 +52,7 @@
       background: #fafafa;
       font-family: inherit;
     }
-    input:focus, select:focus {
-      border-color: #2e7d32;
-      background: white;
-    }
+    input:focus, select:focus { border-color: #2e7d32; background: white; }
     .btn {
       width: 100%;
       padding: 15px;
@@ -78,9 +64,7 @@
       font-weight: 700;
       cursor: pointer;
     }
-    .btn:active {
-      background: #1b5e20;
-    }
+    .btn:active { background: #1b5e20; }
     .list-item {
       padding: 14px;
       border-bottom: 1px solid #f0f0f0;
@@ -89,9 +73,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    .list-item:last-child {
-      border-bottom: none;
-    }
+    .list-item:last-child { border-bottom: none; }
     .badge {
       padding: 4px 10px;
       border-radius: 8px;
@@ -157,33 +139,38 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dXFldHJteW5pbXh3aXhjeWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTEzMDQsImV4cCI6MjEwMDY2NzMwNH0.4RzUsVNRwEZOhp0Rz1a7tMU0Wcv-HjOoelc1xLdaVbs';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Check auth
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) window.location.href = '/index.html';
+    // Auth check using localStorage
+    const userData = JSON.parse(localStorage.getItem('ajedash_user'));
+    if (!userData || userData.role !== 'seller') {
+      window.location.href = '/index.html';
+    }
+    const sellerPhone = userData.phone;
 
     // Load drivers
     async function loadDrivers() {
       const { data } = await supabase.from('drivers').select('*');
       const sel = document.getElementById('driverPhone');
       sel.innerHTML = '<option value="">Select driver</option>';
-      data.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.phone;
-        opt.textContent = d.name || d.phone;
-        sel.appendChild(opt);
-      });
+      if (data) {
+        data.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.phone;
+          opt.textContent = d.name || d.phone;
+          sel.appendChild(opt);
+        });
+      }
     }
     await loadDrivers();
 
     window.toggleDueDate = () => {
-      document.getElementById('dueDate').style.display = 
+      document.getElementById('dueDate').style.display =
         document.getElementById('paymentType').value === 'credit' ? 'block' : 'none';
     };
 
     window.createDelivery = async () => {
       const pin = Math.floor(1000 + Math.random() * 9000).toString();
       const delivery = {
-        seller_id: user.id,
+        seller_phone: sellerPhone,
         receiver_name: document.getElementById('receiverName').value,
         receiver_phone: document.getElementById('receiverPhone').value,
         items: document.getElementById('items').value,
@@ -197,12 +184,12 @@
       const msg = document.getElementById('deliveryMsg');
       if (error) {
         msg.style.color = '#d32f2f';
-        msg.textContent = 'Failed to create delivery.';
+        msg.textContent = 'Failed: ' + error.message;
         return;
       }
       msg.style.color = '#2e7d32';
-      msg.textContent = 'Delivery created!';
-      // Open SMS
+      msg.textContent = 'Delivery created! PIN: ' + pin;
+      // Native SMS
       const smsMsg = delivery.payment_type === 'credit'
         ? `AjeDash: ${delivery.receiver_name}, you received ${delivery.items} ON CREDIT. Pay by ${delivery.due_date}. PIN: ${pin}.`
         : `AjeDash: ${delivery.receiver_name}, you will receive ${delivery.items}. Pay on delivery. PIN: ${pin}.`;
@@ -212,9 +199,9 @@
     };
 
     async function loadDeliveries() {
-      const { data } = await supabase.from('deliveries').select('*').eq('seller_id', user.id).order('created_at', { ascending: false }).limit(10);
+      const { data } = await supabase.from('deliveries').select('*').eq('seller_phone', sellerPhone).order('created_at', { ascending: false }).limit(20);
       const div = document.getElementById('deliveryList');
-      if (!data.length) { div.innerHTML = '<p style="color:#999;font-size:14px;">No deliveries yet.</p>'; return; }
+      if (!data || !data.length) { div.innerHTML = '<p style="color:#999;font-size:14px;">No deliveries yet.</p>'; return; }
       div.innerHTML = data.map(d => `
         <div class="list-item">
           <div>
@@ -227,9 +214,9 @@
     }
 
     async function loadCredits() {
-      const { data } = await supabase.from('deliveries').select('*').eq('seller_id', user.id).eq('payment_type', 'credit').neq('status', 'settled');
+      const { data } = await supabase.from('deliveries').select('*').eq('seller_phone', sellerPhone).eq('payment_type', 'credit').neq('status', 'settled');
       const div = document.getElementById('creditList');
-      if (!data.length) { div.innerHTML = '<p style="color:#999;font-size:14px;">No outstanding credit.</p>'; return; }
+      if (!data || !data.length) { div.innerHTML = '<p style="color:#999;font-size:14px;">No outstanding credit.</p>'; return; }
       div.innerHTML = data.map(d => {
         const overdue = d.due_date && new Date(d.due_date) < new Date();
         return `
@@ -237,6 +224,7 @@
             <div>
               <strong>${d.receiver_name}</strong><br>
               <small style="color:#888;">${d.items} · Due: ${d.due_date || 'N/A'}</small>
+              ${overdue ? '<br><span class="badge badge-overdue">OVERDUE</span>' : ''}
             </div>
             <button class="small-btn" onclick="markPaid('${d.id}')">Paid</button>
           </div>
@@ -250,8 +238,8 @@
       loadCredits();
     };
 
-    window.handleLogout = async () => {
-      await supabase.auth.signOut();
+    window.handleLogout = () => {
+      localStorage.removeItem('ajedash_user');
       window.location.href = '/index.html';
     };
 
