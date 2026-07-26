@@ -71,7 +71,6 @@
       outline: none;
       background: #fafafa;
       transition: all 0.2s;
-      text-align: left;
     }
     input:focus {
       border-color: #2e7d32;
@@ -106,6 +105,8 @@
     .success { color: #2e7d32; font-size: 13px; margin-top: 12px; font-weight: 500; }
     .hidden { display: none; }
     hr { border: none; border-top: 1px solid #f0f0f0; margin: 25px 0; }
+    .signup-fields { display: none; }
+    .signup-fields.show { display: block; }
   </style>
 </head>
 <body>
@@ -119,13 +120,21 @@
       <button id="driverTab" class="tab" onclick="switchRole('driver')">Driver</button>
     </div>
 
-    <!-- Form -->
+    <!-- Form Fields -->
     <input type="tel" id="phone" placeholder="Phone number (08012345678)" inputmode="tel" autocomplete="tel">
+    
+    <!-- Login PIN field (always visible) -->
     <input type="password" id="pin" maxlength="4" placeholder="4-digit PIN" inputmode="numeric" autocomplete="off">
+    
+    <!-- Signup confirm PIN field (hidden until signup mode) -->
+    <div id="signupFields" class="signup-fields">
+      <input type="password" id="confirmPin" maxlength="4" placeholder="Confirm 4-digit PIN" inputmode="numeric" autocomplete="off">
+    </div>
     
     <!-- Buttons -->
     <button class="btn" id="loginBtn">Login</button>
-    <button class="btn btn-outline" id="signupBtn" style="margin-top:10px;">Create Account</button>
+    <p style="margin:15px 0;font-size:14px;color:#666;">or</p>
+    <button class="btn btn-outline" id="signupBtn">Create Account</button>
     
     <p id="msg" class="error"></p>
 
@@ -143,13 +152,14 @@
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // ========== REPLACE THESE WITH YOUR REAL SUPABASE CREDENTIALS ==========
+    // ========== REPLACE WITH YOUR REAL CREDENTIALS ==========
     const SUPABASE_URL = 'https://wxuqetrmynimxwixcydp.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dXFldHJteW5pbXh3aXhjeWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwOTEzMDQsImV4cCI6MjEwMDY2NzMwNH0.4RzUsVNRwEZOhp0Rz1a7tMU0Wcv-HjOoelc1xLdaVbs';
-    // =======================================================================
+    // =========================================================
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let currentRole = 'seller';
+    let isSignupMode = false;
 
     // ========== ROLE SWITCH ==========
     window.switchRole = (role) => {
@@ -158,7 +168,25 @@
       document.getElementById('driverTab').classList.toggle('active', role === 'driver');
     };
 
-    // ========== LOGIN ==========
+    // ========== TOGGLE SIGNUP FIELDS ==========
+    document.getElementById('signupBtn').addEventListener('click', () => {
+      isSignupMode = true;
+      document.getElementById('signupFields').classList.add('show');
+      document.getElementById('loginBtn').textContent = 'Complete Sign Up';
+      document.getElementById('signupBtn').style.display = 'none';
+      document.getElementById('msg').textContent = '';
+    });
+
+    // ========== RESET TO LOGIN MODE ==========
+    function resetToLoginMode() {
+      isSignupMode = false;
+      document.getElementById('signupFields').classList.remove('show');
+      document.getElementById('loginBtn').textContent = 'Login';
+      document.getElementById('signupBtn').style.display = 'block';
+      document.getElementById('confirmPin').value = '';
+    }
+
+    // ========== LOGIN / SIGNUP HANDLER ==========
     document.getElementById('loginBtn').addEventListener('click', async () => {
       const phone = document.getElementById('phone').value.trim();
       const pin = document.getElementById('pin').value.trim();
@@ -166,44 +194,9 @@
       msg.textContent = '';
       msg.style.color = '#d32f2f';
 
+      // Validation
       if (!phone || !pin) {
         msg.textContent = 'Enter phone number and PIN.';
-        return;
-      }
-
-      const fakeEmail = phone + '@ajedash.app';
-      console.log('Attempting login:', fakeEmail, pin);
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: fakeEmail,
-        password: pin
-      });
-
-      if (error) {
-        console.error('Login error:', error);
-        msg.textContent = 'Login failed. Check phone and PIN.';
-        return;
-      }
-
-      // Check role and redirect
-      const { data: seller } = await supabase.from('sellers').select('id').eq('id', data.user.id).single();
-      if (seller) {
-        window.location.href = '/dashboard.html';
-      } else {
-        window.location.href = '/driver.html';
-      }
-    });
-
-    // ========== SIGNUP ==========
-    document.getElementById('signupBtn').addEventListener('click', async () => {
-      const phone = document.getElementById('phone').value.trim();
-      const pin = document.getElementById('pin').value.trim();
-      const msg = document.getElementById('msg');
-      msg.textContent = '';
-      msg.style.color = '#d32f2f';
-
-      if (!phone || !pin) {
-        msg.textContent = 'Enter phone number and 4-digit PIN to create account.';
         return;
       }
 
@@ -213,43 +206,95 @@
       }
 
       const fakeEmail = phone + '@ajedash.app';
-      console.log('Attempting signup:', fakeEmail, pin, 'Role:', currentRole);
 
-      const { data, error } = await supabase.auth.signUp({
+      // ========== SIGNUP FLOW ==========
+      if (isSignupMode) {
+        const confirmPin = document.getElementById('confirmPin').value.trim();
+
+        if (!confirmPin) {
+          msg.textContent = 'Please confirm your PIN.';
+          return;
+        }
+
+        if (pin !== confirmPin) {
+          msg.textContent = 'PINs do not match.';
+          return;
+        }
+
+        console.log('Signing up:', fakeEmail, 'Role:', currentRole);
+
+        const { data, error } = await supabase.auth.signUp({
+          email: fakeEmail,
+          password: pin
+        });
+
+        if (error) {
+          console.error('Signup error:', error);
+          // Check if it's the 6-char minimum error
+          if (error.message.includes('password') && error.message.includes('6')) {
+            msg.textContent = 'Error: Supabase still requires 6 characters. Did you change "Minimum password length" to 4 in Authentication > Settings?';
+          } else if (error.message.includes('already registered')) {
+            msg.textContent = 'This phone number is already registered. Try logging in.';
+          } else {
+            msg.textContent = error.message;
+          }
+          resetToLoginMode();
+          return;
+        }
+
+        if (!data.user) {
+          msg.textContent = 'Signup failed. No user returned.';
+          resetToLoginMode();
+          return;
+        }
+
+        // Insert into correct table
+        const table = currentRole === 'seller' ? 'sellers' : 'drivers';
+        const { error: insertErr } = await supabase.from(table).insert({
+          id: data.user.id,
+          phone: phone
+        });
+
+        if (insertErr) {
+          console.error('Profile insert error:', insertErr);
+          msg.textContent = 'Account created but profile setup failed. Try logging in.';
+          resetToLoginMode();
+          return;
+        }
+
+        msg.style.color = '#2e7d32';
+        msg.textContent = `Account created as ${currentRole}! You can now login.`;
+        resetToLoginMode();
+        document.getElementById('phone').value = '';
+        document.getElementById('pin').value = '';
+        return;
+      }
+
+      // ========== LOGIN FLOW ==========
+      console.log('Logging in:', fakeEmail);
+
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: fakeEmail,
         password: pin
       });
 
       if (error) {
-        console.error('Signup error:', error);
-        msg.textContent = error.message;
+        console.error('Login error:', error);
+        if (error.message.includes('Invalid login credentials')) {
+          msg.textContent = 'Wrong phone or PIN. Try again or create an account.';
+        } else {
+          msg.textContent = 'Login failed: ' + error.message;
+        }
         return;
       }
 
-      if (!data.user) {
-        msg.textContent = 'Signup failed. Please try again.';
-        return;
+      // Redirect based on role
+      const { data: seller } = await supabase.from('sellers').select('id').eq('id', data.user.id).single();
+      if (seller) {
+        window.location.href = '/dashboard.html';
+      } else {
+        window.location.href = '/driver.html';
       }
-
-      // Insert into correct table
-      const table = currentRole === 'seller' ? 'sellers' : 'drivers';
-      const { error: insertErr } = await supabase.from(table).insert({
-        id: data.user.id,
-        phone: phone
-      });
-
-      if (insertErr) {
-        console.error('Insert error:', insertErr);
-        msg.textContent = insertErr.message;
-        return;
-      }
-
-      msg.style.color = '#2e7d32';
-      msg.textContent = `Account created as ${currentRole}! You can now login.`;
-
-      // Clear form
-      document.getElementById('phone').value = '';
-      document.getElementById('pin').value = '';
     });
 
     // ========== FORGOT PIN ==========
@@ -269,14 +314,8 @@
       }
 
       const { error } = await supabase.from('pin_reset_requests').insert({ phone });
-
-      if (error) {
-        resetMsg.textContent = 'Request failed. Try again.';
-        resetMsg.style.color = '#d32f2f';
-      } else {
-        resetMsg.textContent = 'Request sent. We will call you within 24 hours.';
-        resetMsg.style.color = '#2e7d32';
-      }
+      resetMsg.textContent = error ? 'Request failed. Try again.' : 'Request sent. We will call you within 24 hours.';
+      resetMsg.style.color = error ? '#d32f2f' : '#2e7d32';
     });
   </script>
 </body>
