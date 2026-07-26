@@ -50,6 +50,7 @@
     hr { border: none; border-top: 1px solid #f0f0f0; margin: 25px 0; }
     .signup-fields { display: none; }
     .signup-fields.show { display: block; }
+    .switch-mode { margin-top: 18px; font-size: 14px; color: #666; }
   </style>
 </head>
 <body>
@@ -57,25 +58,38 @@
     <div class="logo">AjeDash</div>
     <div class="subtitle">DELIVER PROFIT, SECURED.</div>
 
+    <!-- Role Tabs -->
     <div class="tabs">
       <button id="sellerTab" class="tab active" onclick="switchRole('seller')">Seller</button>
       <button id="driverTab" class="tab" onclick="switchRole('driver')">Driver</button>
     </div>
 
+    <!-- Login Fields (always visible) -->
     <input type="tel" id="phone" placeholder="Phone number (08012345678)" inputmode="tel" autocomplete="tel">
     <input type="password" id="pin" maxlength="4" placeholder="4-digit PIN" inputmode="numeric" autocomplete="off">
     
+    <!-- Signup Extra Fields (hidden by default) -->
     <div id="signupFields" class="signup-fields">
       <input type="password" id="confirmPin" maxlength="4" placeholder="Confirm 4-digit PIN" inputmode="numeric" autocomplete="off">
+      <input type="text" id="businessName" placeholder="Business name (Seller only)" style="display:none;">
       <input type="text" id="driverName" placeholder="Your full name (Driver only)" style="display:none;">
     </div>
     
+    <!-- Buttons -->
     <button class="btn" id="loginBtn">Login</button>
-    <p style="margin:15px 0;font-size:14px;color:#666;">or</p>
+    <p id="loginModeText" style="margin:15px 0;font-size:14px;color:#666;">or</p>
     <button class="btn btn-outline" id="signupBtn">Create Account</button>
     
+    <!-- Switch back to login (visible only in signup mode) -->
+    <p id="switchToLoginText" class="switch-mode hidden">
+      Already have an account? <a class="link" href="#" id="switchToLoginLink">Login</a>
+    </p>
+    
     <p id="msg" class="error"></p>
+
     <hr>
+
+    <!-- Forgot PIN -->
     <a class="link" href="#" onclick="toggleReset(); return false;" style="font-size:13px;">Forgot PIN?</a>
     <div id="resetBox" class="hidden" style="margin-top:15px;">
       <input type="tel" id="resetPhone" placeholder="Your phone number">
@@ -92,32 +106,52 @@
     let currentRole = 'seller';
     let isSignupMode = false;
 
+    // ========== ROLE SWITCH ==========
     window.switchRole = (role) => {
       currentRole = role;
       document.getElementById('sellerTab').classList.toggle('active', role === 'seller');
       document.getElementById('driverTab').classList.toggle('active', role === 'driver');
-      document.getElementById('driverName').style.display = role === 'driver' && isSignupMode ? 'block' : 'none';
+      // Update signup name field visibility
+      if (isSignupMode) {
+        document.getElementById('businessName').style.display = role === 'seller' ? 'block' : 'none';
+        document.getElementById('driverName').style.display = role === 'driver' ? 'block' : 'none';
+      }
     };
 
+    // ========== ENTER SIGNUP MODE ==========
     document.getElementById('signupBtn').addEventListener('click', () => {
       isSignupMode = true;
       document.getElementById('signupFields').classList.add('show');
       document.getElementById('loginBtn').textContent = 'Complete Sign Up';
       document.getElementById('signupBtn').style.display = 'none';
+      document.getElementById('loginModeText').style.display = 'none';
+      document.getElementById('switchToLoginText').classList.remove('hidden');
+      document.getElementById('businessName').style.display = currentRole === 'seller' ? 'block' : 'none';
       document.getElementById('driverName').style.display = currentRole === 'driver' ? 'block' : 'none';
       document.getElementById('msg').textContent = '';
     });
 
+    // ========== SWITCH BACK TO LOGIN MODE ==========
     function resetToLoginMode() {
       isSignupMode = false;
       document.getElementById('signupFields').classList.remove('show');
       document.getElementById('loginBtn').textContent = 'Login';
       document.getElementById('signupBtn').style.display = 'block';
+      document.getElementById('loginModeText').style.display = 'block';
+      document.getElementById('switchToLoginText').classList.add('hidden');
       document.getElementById('confirmPin').value = '';
+      document.getElementById('businessName').value = '';
       document.getElementById('driverName').value = '';
+      document.getElementById('businessName').style.display = 'none';
       document.getElementById('driverName').style.display = 'none';
     }
 
+    document.getElementById('switchToLoginLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      resetToLoginMode();
+    });
+
+    // ========== LOGIN / SIGNUP HANDLER ==========
     document.getElementById('loginBtn').addEventListener('click', async () => {
       const phone = document.getElementById('phone').value.trim();
       const pin = document.getElementById('pin').value.trim();
@@ -128,6 +162,7 @@
       if (!phone || !pin) { msg.textContent = 'Enter phone number and PIN.'; return; }
       if (pin.length !== 4 || isNaN(pin)) { msg.textContent = 'PIN must be exactly 4 digits.'; return; }
 
+      // ========== SIGNUP ==========
       if (isSignupMode) {
         const confirmPin = document.getElementById('confirmPin').value.trim();
         if (!confirmPin) { msg.textContent = 'Please confirm your PIN.'; return; }
@@ -138,7 +173,12 @@
         if (existing) { msg.textContent = 'This phone number is already registered. Try logging in.'; resetToLoginMode(); return; }
 
         const insertData = { phone, pin };
-        if (currentRole === 'driver') {
+        
+        if (currentRole === 'seller') {
+          const bizName = document.getElementById('businessName').value.trim();
+          if (!bizName) { msg.textContent = 'Enter your business name.'; return; }
+          insertData.business_name = bizName;
+        } else {
           const driverName = document.getElementById('driverName').value.trim();
           insertData.name = driverName || phone;
         }
@@ -154,13 +194,15 @@
         return;
       }
 
+      // ========== LOGIN ==========
       const table = currentRole === 'seller' ? 'sellers' : 'drivers';
       const { data, error } = await supabase.from(table).select('*').eq('phone', phone).eq('pin', pin).single();
       if (error || !data) { msg.textContent = 'Wrong phone or PIN. Try again.'; return; }
 
       localStorage.setItem('ajedash_user', JSON.stringify({
         phone: data.phone,
-        name: data.name || '',
+        name: data.name || data.business_name || '',
+        business_name: data.business_name || '',
         role: currentRole,
         table: table
       }));
@@ -168,6 +210,7 @@
       window.location.href = currentRole === 'seller' ? '/dashboard.html' : '/driver.html';
     });
 
+    // ========== FORGOT PIN ==========
     window.toggleReset = () => document.getElementById('resetBox').classList.toggle('hidden');
 
     document.getElementById('resetBtn').addEventListener('click', async () => {
